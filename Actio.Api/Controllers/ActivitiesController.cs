@@ -21,17 +21,7 @@ namespace Actio.Api.Controllers
         {
             command.Id = Guid.NewGuid(); 
             command.CreatedAt = DateTime.UtcNow;
-
-            try
-            {
-                await _busClient.PublishAsync(command);
-
-            }
-            catch (Exception ex)
-            {
-                var a = ex;
-            }
-
+            await _busClient.PublishAsync(command);
             return Accepted($"activities/{command.Id}");
         }
     }
