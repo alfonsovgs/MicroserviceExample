@@ -40,6 +40,7 @@ namespace Actio.Services.Activities
             services.AddScoped<IActivityRepository, ActivityRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IDatabaseSeeder, CustomMongoSeeder>();
+            services.AddTransient<IActivityService, ActivityService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
