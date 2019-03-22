@@ -6,11 +6,11 @@ using Actio.Common.Events;
 
 namespace Actio.Api.Handlers
 {
-    public class ActivityCreatedHandler : IEventHandler<ActivityCreated>
+    public class UserCreatedHandler : IEventHandler<UserCreated>
     {
-        public async Task HandleAsync(ActivityCreated @event)
+        public async Task HandleAsync(UserCreated @event)
         {
-            Console.WriteLine($"Activity created: {@event.Name}");
+            Console.WriteLine($"User created: {@event.Name}");
             await Task.CompletedTask;
         }
     }
