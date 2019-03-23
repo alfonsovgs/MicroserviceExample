@@ -1,5 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,20 +12,20 @@ namespace Actio.Common.Auth
             var options = new JwtOptions();
             var section = configuration.GetSection("jwt");
             section.Bind(options);
-            services.Configure<JwtOptions>(section);
+            services.Configure<JwtOptions>(configuration.GetSection("jwt"));
             services.AddSingleton<IJwtHandler, JwtHandler>();
             services.AddAuthentication()
                 .AddJwtBearer(cfg =>
                 {
                     cfg.RequireHttpsMetadata = false;
                     cfg.SaveToken = true;
-                    cfg.TokenValidationParameters = new TokenValidationParameters
+                    cfg.TokenValidationParameters = new TokenValidationParameters()
                     {
-                        ValidateAudience = true,
+                        ValidateAudience = false,
                         ValidIssuer = options.Issuer,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SecretKey))
                     };
                 });
-        }
+        }         
     }
 }

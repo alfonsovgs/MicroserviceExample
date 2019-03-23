@@ -1,16 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
+using System;
 using System.Text;
-using Microsoft.Extensions.Options;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.IO;
+using Microsoft.Extensions.Options;
 
 namespace Actio.Common.Auth
 {
     public class JwtHandler : IJwtHandler
     {
-        private readonly JwtOptions _options;
         private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+        private readonly JwtOptions _options;
         private readonly SecurityKey _issuerSigningKey;
         private readonly SigningCredentials _signingCredentials;
         private readonly JwtHeader _jwtHeader;
@@ -24,10 +28,10 @@ namespace Actio.Common.Auth
             _jwtHeader = new JwtHeader(_signingCredentials);
             _tokenValidationParameters = new TokenValidationParameters
             {
-                ValidateAudience = true,
+                ValidateAudience = false,
                 ValidIssuer = _options.Issuer,
                 IssuerSigningKey = _issuerSigningKey
-            };
+            }; 
         }
 
         public JsonWebToken Create(Guid userId)
@@ -35,17 +39,17 @@ namespace Actio.Common.Auth
             var nowUtc = DateTime.UtcNow;
             var expires = nowUtc.AddMinutes(_options.ExpiryMinutes);
             var centuryBegin = new DateTime(1970, 1, 1).ToUniversalTime();
-            var exp = (long) (new TimeSpan(expires.Ticks - centuryBegin.Ticks).TotalSeconds);
-            var now = (long) (new TimeSpan(nowUtc.Ticks - centuryBegin.Ticks).TotalSeconds);
+            var exp = (long)(new TimeSpan(expires.Ticks - centuryBegin.Ticks).TotalSeconds);
+            var now = (long)(new TimeSpan(nowUtc.Ticks - centuryBegin.Ticks).TotalSeconds);
             var payload = new JwtPayload
             {
                 {"sub", userId},
                 {"iss", _options.Issuer},
                 {"iat", now},
-                {"exp", exp},
+                {"exp", expires},
                 {"unique_name", userId}
             };
-
+          
             var jwt = new JwtSecurityToken(_jwtHeader, payload);
             var token = _jwtSecurityTokenHandler.WriteToken(jwt);
             return new JsonWebToken
