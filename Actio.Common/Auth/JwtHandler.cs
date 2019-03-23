@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -38,20 +39,32 @@ namespace Actio.Common.Auth
         {
             var nowUtc = DateTime.UtcNow;
             var expires = nowUtc.AddMinutes(_options.ExpiryMinutes);
-            var centuryBegin = new DateTime(1970, 1, 1).ToUniversalTime();
+            var centuryBegin = new DateTime(1970,1,1).ToUniversalTime();
             var exp = (long)(new TimeSpan(expires.Ticks - centuryBegin.Ticks).TotalSeconds);
-            var now = (long)(new TimeSpan(nowUtc.Ticks - centuryBegin.Ticks).TotalSeconds);
+            var iat = (long)(new TimeSpan(nowUtc.Ticks - centuryBegin.Ticks).TotalSeconds);
+     
             var payload = new JwtPayload
             {
                 {"sub", userId},
                 {"iss", _options.Issuer},
-                {"iat", now},
-                {"exp", expires},
-                {"unique_name", userId}
+                {"iat", iat},
+                {"exp", exp},
+                {"unique_name", userId},
             };
-          
             var jwt = new JwtSecurityToken(_jwtHeader, payload);
-            var token = _jwtSecurityTokenHandler.WriteToken(jwt);
+
+            var jwt2 = new JwtSecurityToken(
+                issuer: _options.Issuer,
+                audience: null,
+                expires: DateTime.UtcNow.AddMinutes(_options.ExpiryMinutes),
+                signingCredentials: _signingCredentials,
+                claims: new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, userId.ToString())
+                }
+            );
+
+            var token = _jwtSecurityTokenHandler.WriteToken(jwt2);
             return new JsonWebToken
             {
                 Token = token,

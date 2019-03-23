@@ -21,7 +21,7 @@ namespace Actio.Services.Activities.Services
 
         public async Task AddAsync(Guid id, Guid userId, string category, string name, string description, DateTime createAt)
         {
-            var activityCategory = await _categoryRepository.GetAsync(name);
+            var activityCategory = await _categoryRepository.GetAsync(category);
             if(activityCategory == null)
                 throw new ActioException("category_not_found", $"Category: '{category}' was not found");
 

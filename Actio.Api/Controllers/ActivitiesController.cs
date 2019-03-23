@@ -27,8 +27,16 @@ namespace Actio.Api.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Get()
         {
-            var activities = await _repository.BrowseAsync(Guid.Parse(User.Identity.Name));
-            return Json(activities.Select(x => new {x.Id, x.Name, x.Category, x.CreateAt}));
+            try
+            {
+                var activities = await _repository.BrowseAsync(Guid.Parse(User.Identity.Name));
+                return Json(activities.Select(x => new {x.Id, x.Name, x.Category, x.CreateAt}));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
         }
 
         [HttpGet("{id}")]
